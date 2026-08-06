@@ -1,0 +1,16 @@
+*.txt
+*.html
+*.supp
+.cache
+compile_commands.json
+build
+cscope.*
+tags
+*~*
+TAGS
+*.log
+
+# perf generated stuff
+*.perf
+*.data
+*.old

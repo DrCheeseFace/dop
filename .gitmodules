@@ -1,0 +1,3 @@
+[submodule "src/mr_utils"]
+	path = src/mr_utils
+	url = https://github.com/drcheeseface/mr_utils
