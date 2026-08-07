@@ -118,7 +118,6 @@ internal_function void
 lexer_parse_code_string(const char *code_string, lexer_Tokens *tokens,
 			size_t *tokens_length)
 {
-	ignore tokens;
 	size_t s_len = strlen(code_string);
 	*tokens_length = 0;
 
