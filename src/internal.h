@@ -4,6 +4,7 @@
 #include <mr_utils.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 //
 // LEXER
@@ -24,12 +25,16 @@ enum lexer_TokenTag {
 	LEXER_TOKEN_TAG_TYPE_U8,
 
 	LEXER_TOKEN_TAG_EOF,
+
+	LEXER_TOKEN_TAG_COUNT,
 };
 
 struct lexer_Token {
 	enum lexer_TokenTag type;
-	unsigned char value[32];
+	unsigned char value[31];
 };
+
+#define MAX_TOKEN_LITERAL_LENGTH 30
 
 typedef struct lexer_Token *lexer_Tokens;
 

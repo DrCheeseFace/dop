@@ -1,11 +1,15 @@
 #include "internal.h"
 
+const char *lexer_token_tag_to_char[LEXER_TOKEN_TAG_COUNT] = {
+	"-", "-", "return", "(", ")", "{", "}", ";", "U8", "-"
+};
+
 internal_function lexer_Tokens *
 lexer_tokens_append_token(lexer_Tokens *tokens, size_t *tokens_length,
 			  struct lexer_Token token)
 {
 	lexer_Tokens temp = *tokens;
-	temp = realloc(temp, (*tokens_length + 1) * sizeof(*tokens));
+	temp = realloc(temp, ((*tokens_length) + 1) * sizeof(*temp));
 	if (!temp) {
 		return NULL;
 	}
@@ -17,20 +21,144 @@ lexer_tokens_append_token(lexer_Tokens *tokens, size_t *tokens_length,
 	return tokens;
 }
 
-lexer_Tokens
-lexer_create_tokens(const char *s)
+internal_function Bool
+lexer_char_is_delimiter(const char c)
 {
-	ignore s;
+	for (enum lexer_TokenTag tag = LEXER_TOKEN_TAG_DELIM_OPENPAREN;
+	     tag <= LEXER_TOKEN_TAG_DELIM_ENDSTATEMENT; tag++) {
+		if (*lexer_token_tag_to_char[tag] == c) {
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
+internal_function enum lexer_TokenTag
+lexer_char_get_delimiter(const char c)
+{
+	for (enum lexer_TokenTag tag = LEXER_TOKEN_TAG_DELIM_OPENPAREN;
+	     tag <= LEXER_TOKEN_TAG_DELIM_ENDSTATEMENT; tag++) {
+		if (*lexer_token_tag_to_char[tag] == c) {
+			return tag;
+		}
+	}
+
+	__builtin_unreachable();
+}
+
+internal_function Bool
+lexer_char_is_whitespace(const char c)
+{
+	if (c == ' ' || c == '\t' || c == '\n') {
+		return TRUE;
+	}
+	return FALSE;
+}
+
+internal_function Bool
+lexer_char_is_number(const char c)
+{
+	if (c >= '0' && c <= '9') {
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+internal_function void
+lexer_get_token_from_string_view(const char *code_string,
+				 struct lexer_Token *new_token, size_t left,
+				 size_t right)
+{
+	memset(new_token, 0, sizeof(*new_token));
+
+	size_t string_view_length = right - left;
+	if (string_view_length > MAX_TOKEN_LITERAL_LENGTH) {
+		__builtin_unreachable();
+		return;
+	}
+
+	//@TODO only copy value if literal
+	new_token->value[string_view_length] = '\0';
+	memcpy(new_token->value, &code_string[left], right - left);
+
+	// check delimiter token type
+	if (lexer_char_is_delimiter(code_string[left])) {
+		new_token->type = lexer_char_get_delimiter(code_string[left]);
+		return;
+	}
+
+	// check keyword return token type
+	if (strncmp((const char *)new_token->value,
+		    lexer_token_tag_to_char[LEXER_TOKEN_TAG_KEYWORD_RETURN],
+		    string_view_length) == 0) {
+		new_token->type = LEXER_TOKEN_TAG_KEYWORD_RETURN;
+		return;
+	}
+
+	// check type return token type
+	if (strncmp((const char *)new_token->value,
+		    lexer_token_tag_to_char[LEXER_TOKEN_TAG_TYPE_U8],
+		    string_view_length) == 0) {
+		new_token->type = LEXER_TOKEN_TAG_TYPE_U8;
+		return;
+	}
+
+	if (lexer_char_is_number(code_string[left])) {
+		//@TODO verify
+		new_token->type = LEXER_TOKEN_TAG_LITERAL_NUM;
+	} else {
+		//@TODO verify
+		new_token->type = LEXER_TOKEN_TAG_LITERAL_IDENTIFIER;
+	}
+}
+
+internal_function void
+lexer_parse_code_string(const char *code_string, lexer_Tokens *tokens,
+			size_t *tokens_length)
+{
+	ignore tokens;
+	size_t s_len = strlen(code_string);
+	*tokens_length = 0;
+
+	size_t left = 0, right = 0;
+
+	while (left < s_len) {
+		while (!lexer_char_is_delimiter(code_string[right]) &&
+		       !lexer_char_is_whitespace(code_string[right]) &&
+		       !lexer_char_is_delimiter(code_string[left]) &&
+		       right < s_len) {
+			right++;
+		}
+
+		struct lexer_Token new_token = { 0 };
+		lexer_get_token_from_string_view(code_string, &new_token, left,
+						 right);
+		tokens = lexer_tokens_append_token(tokens, tokens_length,
+						   new_token);
+
+		left = right;
+		while (lexer_char_is_whitespace(code_string[left]) &&
+		       left < s_len) {
+			left++;
+		}
+		right = left + 1;
+	}
+}
+
+lexer_Tokens
+lexer_create_tokens(const char *code_string)
+{
 	lexer_Tokens tokens = calloc(1, sizeof(*tokens));
 	if (!tokens) {
 		return NULL;
 	}
 
-	size_t tokens_length = 0;
+	size_t tokens_length = CAFE_BABE;
 
-	/* char *head, *tail = s; */
-	/* ignore head; */
-	/* ignore tail; */
+	lexer_parse_code_string(code_string, &tokens, &tokens_length);
+
 	lexer_tokens_append_token(
 		&tokens, &tokens_length,
 		(struct lexer_Token){ .type = LEXER_TOKEN_TAG_EOF });
