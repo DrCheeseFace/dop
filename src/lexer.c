@@ -1,7 +1,17 @@
 #include "internal.h"
 
+#define NO_DEFAULT_TOKEN_VALUE "-"
 const char *lexer_token_tag_to_char[LEXER_TOKEN_TAG_COUNT] = {
-	"-", "-", "return", "(", ")", "{", "}", ";", "U8", "-"
+	NO_DEFAULT_TOKEN_VALUE,
+	NO_DEFAULT_TOKEN_VALUE,
+	"return",
+	"(",
+	")",
+	"{",
+	"}",
+	";",
+	"U8",
+	NO_DEFAULT_TOKEN_VALUE
 };
 
 internal_function lexer_Tokens *
@@ -90,17 +100,16 @@ lexer_get_token_from_string_view(const char *code_string,
 	}
 
 	// check keyword return token type
-	if (strncmp((const char *)new_token->value,
-		    lexer_token_tag_to_char[LEXER_TOKEN_TAG_KEYWORD_RETURN],
-		    string_view_length) == 0) {
+	if (strcmp((const char *)new_token->value,
+		   lexer_token_tag_to_char[LEXER_TOKEN_TAG_KEYWORD_RETURN]) ==
+	    0) {
 		new_token->type = LEXER_TOKEN_TAG_KEYWORD_RETURN;
 		return;
 	}
 
 	// check type return token type
-	if (strncmp((const char *)new_token->value,
-		    lexer_token_tag_to_char[LEXER_TOKEN_TAG_TYPE_U8],
-		    string_view_length) == 0) {
+	if (strcmp((const char *)new_token->value,
+		   lexer_token_tag_to_char[LEXER_TOKEN_TAG_TYPE_U8]) == 0) {
 		new_token->type = LEXER_TOKEN_TAG_TYPE_U8;
 		return;
 	}
