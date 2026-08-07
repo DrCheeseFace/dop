@@ -22,9 +22,8 @@ DOP - Data Oriented Programming Lanuage
 | TYPE_U8            | U8        |
 
 
-C
+/* [typeu8, identifier(main), openbracket, closebracket, opencurly, keywordreturn, literalnum(3), closecurley] */
 U8 main()
 {
     return 3;
 }
-

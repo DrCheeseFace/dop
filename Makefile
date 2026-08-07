@@ -1,9 +1,8 @@
-CC	    = clang 
+CC	    = clang
 CSTANDARD   = c99
-CPPSTANDARD = c++11
 
 INCLUDES    = -Iinclude -Isrc/mr_utils/include
-LDLIBS	    = -lm 
+LDLIBS	    = -lm
 LDFLAGS	    =
 
 # SANITIZERS = -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
@@ -44,9 +43,9 @@ TARGET_TEST    = $(OBJ_DIR)/test.out
 TARGET_SPACERS = $(OBJ_DIR)/spacers
 
 # DO BETTER LOL
-SRC_LIB	 = src/main.cpp
+SRC_LIB	 = src/main.c
 
-SRC_TEST_MAIN  = 
+SRC_TEST_MAIN  = src/test/test.c src/lexer.c
 
 SRC_MR_UTILS   = src/mr_utils/src/mrd_debug.c \
 		 src/mr_utils/src/mrl_logger.c \
@@ -56,7 +55,7 @@ SRC_MR_UTILS   = src/mr_utils/src/mrd_debug.c \
 
 SRC_SPACERS    = src/mr_utils/tools/spacers.c
 
-OBJ_LIB	       = $(SRC_LIB:%.cpp=$(OBJ_DIR)/%.o)
+OBJ_LIB	       = $(SRC_LIB:%.c=$(OBJ_DIR)/%.o)
 OBJ_TEST_MAIN  = $(SRC_TEST_MAIN:%.c=$(OBJ_DIR)/%.o)
 OBJ_MR_UTILS   = $(SRC_MR_UTILS:%.c=$(OBJ_DIR)/%.o)
 OBJ_SPACERS    = $(SRC_SPACERS:%.c=$(OBJ_DIR)/%.o)
@@ -81,10 +80,6 @@ $(TARGET_SPACERS): $(ALL_SPACERS_OBJS)
 $(OBJ_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) -MD -c $< -o $@ -std=$(CSTANDARD) $(CFLAGS)
-
-$(OBJ_DIR)/%.o: %.cpp
-	@mkdir -p $(dir $@)
-	$(CC) -MD -c $< -o $@ -std=$(CPPSTANDARD) $(CFLAGS)
 
 test: tags $(TARGET_TEST)
 	./$(TARGET_TEST)
