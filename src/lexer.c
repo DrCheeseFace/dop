@@ -84,7 +84,7 @@ lexer_get_token_from_string_view(const char *code_string,
 	memset(new_token, 0, sizeof(*new_token));
 
 	size_t string_view_length = right - left;
-	if (string_view_length > MAX_TOKEN_LITERAL_LENGTH) {
+	if (string_view_length > MAX_IDENTIFIER_LENGTH) {
 		__builtin_unreachable();
 		return;
 	}

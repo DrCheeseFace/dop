@@ -1,10 +1,14 @@
-#ifndef _INTERNAL_H
-#define _INTERNAL_H
+#ifndef _LEXER_H
+#define _LEXER_H
 
 #include <mr_utils.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define MAX_IDENTIFIER_LENGTH 30
+
+typedef unsigned char AST_Identifer[MAX_IDENTIFIER_LENGTH + 1];
 
 //
 // LEXER
@@ -31,14 +35,88 @@ enum lexer_TokenTag {
 
 struct lexer_Token {
 	enum lexer_TokenTag type;
-	unsigned char value[31];
+	AST_Identifer value;
 };
-
-#define MAX_TOKEN_LITERAL_LENGTH 30
 
 typedef struct lexer_Token *lexer_Tokens;
 
 lexer_Tokens lexer_create_tokens(const char *s);
 void lexer_destroy_tokens(lexer_Tokens tokens);
 
-#endif //_INTERNAL_H
+//
+// CST
+//
+
+struct cst_Terminal {
+	struct lexer_Token *token;
+};
+
+// expressions
+enum cst_ExpressionKind {
+	CST_EXPRESSION_LITERAL_NUMBER,
+	CST_EXPRESSION_IDENTIFIER,
+};
+
+struct cst_Expression {
+	enum cst_ExpressionKind kind;
+};
+
+struct cst_LiteralExpression {
+	struct cst_Expression base;
+	struct cst_Terminal *value;
+};
+
+struct cst_IdentifierExpression {
+	struct cst_Expression base;
+	struct cst_Terminal *name;
+};
+
+// statements
+enum cst_StatementKind {
+	CST_STATEMENT_RETURN,
+};
+
+struct cst_Statement {
+	enum cst_StatementKind kind;
+};
+
+struct cst_ReturnStatement {
+	struct cst_Statement base;
+	struct cst_Terminal *return_keyword;
+	struct cst_Expression *expression;
+	struct cst_Terminal *semicolon;
+};
+
+// declarations
+enum cst_DeclarationKind {
+	CST_DECLARATION_FUNCTION,
+};
+
+struct cst_Declaration {
+	enum cst_DeclarationKind kind;
+};
+
+struct cst_FunctionDeclaration {
+	struct cst_Declaration base;
+	struct cst_Terminal *return_type;
+	struct cst_Terminal *identifier;
+	struct cst_Terminal *open_paren;
+	struct cst_Terminal *close_paren;
+	struct cst_Block *body;
+};
+
+// block
+struct cst_Block {
+	struct cst_Terminal *open_brace;
+	struct cst_Statement **statements;
+	size_t statement_count;
+	struct cst_Terminal *close_brace;
+};
+
+// program
+struct cst_Program {
+	struct cst_FunctionDeclaration **functions;
+	size_t function_count;
+};
+
+#endif //_LEXER_H
