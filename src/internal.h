@@ -1,5 +1,5 @@
-#ifndef _LEXER_H
-#define _LEXER_H
+#ifndef _INTERNAL_H
+#define _INTERNAL_H
 
 #include <mr_utils.h>
 #include <stdio.h>
@@ -119,4 +119,4 @@ struct cst_Program {
 	size_t function_count;
 };
 
-#endif //_LEXER_H
+#endif //_INTERNAL_H
