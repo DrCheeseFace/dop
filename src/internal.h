@@ -8,7 +8,7 @@
 
 #define MAX_IDENTIFIER_LENGTH 30
 
-typedef unsigned char AST_Identifer[MAX_IDENTIFIER_LENGTH + 1];
+typedef unsigned char ast_Identifier[MAX_IDENTIFIER_LENGTH + 1];
 
 //
 // LEXER
@@ -35,7 +35,7 @@ enum lexer_TokenTag {
 
 struct lexer_Token {
 	enum lexer_TokenTag type;
-	AST_Identifer value;
+	ast_Identifier value;
 };
 
 typedef struct lexer_Token *lexer_Tokens;
