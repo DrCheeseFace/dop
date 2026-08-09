@@ -123,38 +123,6 @@ lexer_get_token_from_string_view(const char *code_string,
 	}
 }
 
-internal_function void
-lexer_parse_code_string(const char *code_string, lexer_Tokens *tokens,
-			size_t *tokens_length)
-{
-	size_t s_len = strlen(code_string);
-	*tokens_length = 0;
-
-	size_t left = 0, right = 0;
-
-	while (left < s_len) {
-		while (!lexer_char_is_delimiter(code_string[right]) &&
-		       !lexer_char_is_whitespace(code_string[right]) &&
-		       !lexer_char_is_delimiter(code_string[left]) &&
-		       right < s_len) {
-			right++;
-		}
-
-		struct lexer_Token new_token = { 0 };
-		lexer_get_token_from_string_view(code_string, &new_token, left,
-						 right);
-		tokens = lexer_tokens_append_token(tokens, tokens_length,
-						   new_token);
-
-		left = right;
-		while (lexer_char_is_whitespace(code_string[left]) &&
-		       left < s_len) {
-			left++;
-		}
-		right = left + 1;
-	}
-}
-
 lexer_Tokens
 lexer_create_tokens(const char *code_string)
 {
@@ -163,9 +131,36 @@ lexer_create_tokens(const char *code_string)
 		return NULL;
 	}
 
-	size_t tokens_length = CAFE_BABE;
+	size_t code_string_len = strlen(code_string);
 
-	lexer_parse_code_string(code_string, &tokens, &tokens_length);
+	size_t tokens_length = 0;
+
+	size_t left = 0, right = 0;
+
+	while (left < code_string_len) {
+		// seek right until delimiter or whitespace or left is delimiter
+		while (!lexer_char_is_delimiter(code_string[right]) &&
+		       !lexer_char_is_whitespace(code_string[right]) &&
+		       !lexer_char_is_delimiter(code_string[left]) &&
+		       right < code_string_len) {
+			right++;
+		}
+
+		struct lexer_Token new_token = { 0 };
+		lexer_get_token_from_string_view(code_string, &new_token, left,
+						 right);
+
+		tokens = *lexer_tokens_append_token(&tokens, &tokens_length,
+						    new_token);
+
+		// seeks past whitespace
+		left = right;
+		while (lexer_char_is_whitespace(code_string[left]) &&
+		       left < code_string_len) {
+			left++;
+		}
+		right = left + 1;
+	}
 
 	lexer_tokens_append_token(
 		&tokens, &tokens_length,
