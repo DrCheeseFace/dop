@@ -1,12 +1,33 @@
 #ifndef _INTERNAL_H
 #define _INTERNAL_H
 
+#define _DEFAULT_SOURCE
+#include <unistd.h>
+
 #include <mr_utils.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define MAX_IDENTIFIER_LENGTH 30
+
+//
+// ALLOCATOR
+//
+typedef struct {
+	uint8_t *pool;
+	size_t capacity;
+	size_t offset;
+} alloc_Pool;
+
+Err alloc_init(alloc_Pool *pool, size_t capacity);
+Err alloc_free(alloc_Pool *pool);
+
+void *alloc_alloc(alloc_Pool *pool, size_t size);
+Err alloc_head_expand(alloc_Pool *pool, size_t size);
+
+void alloc_reset(alloc_Pool *pool);
 
 typedef unsigned char ast_Identifier[MAX_IDENTIFIER_LENGTH + 1];
 
@@ -41,7 +62,7 @@ struct lexer_Token {
 typedef struct lexer_Token *lexer_Tokens;
 
 lexer_Tokens lexer_create_tokens(const char *s);
-void lexer_destroy_tokens(lexer_Tokens tokens);
+void lexer_destroy_tokens(void);
 
 //
 // CST

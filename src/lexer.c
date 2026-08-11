@@ -14,17 +14,18 @@ const char *lexer_token_tag_to_char[LEXER_TOKEN_TAG_COUNT] = {
 	NO_DEFAULT_TOKEN_VALUE
 };
 
+global_variable alloc_Pool lexer_memory_pool = { 0 };
+
 internal_function lexer_Tokens *
 lexer_tokens_append_token(lexer_Tokens *tokens, size_t *tokens_length,
 			  struct lexer_Token token)
 {
-	lexer_Tokens temp = *tokens;
-	temp = realloc(temp, ((*tokens_length) + 1) * sizeof(*temp));
-	if (!temp) {
+	Err err = alloc_head_expand(&lexer_memory_pool,
+				    ((*tokens_length) + 1) * sizeof(*tokens));
+	if (err != OK) {
 		return NULL;
 	}
 
-	*tokens = temp;
 	(*tokens)[*tokens_length] = token;
 	*tokens_length += 1;
 
@@ -126,10 +127,15 @@ lexer_get_token_from_string_view(const char *code_string,
 lexer_Tokens
 lexer_create_tokens(const char *code_string)
 {
-	lexer_Tokens tokens = calloc(1, sizeof(*tokens));
+	Err err = alloc_init(&lexer_memory_pool, getpagesize() * 4);
+	if (err != OK) {
+		return NULL;
+	}
+	lexer_Tokens tokens = alloc_alloc(&lexer_memory_pool, sizeof(*tokens));
 	if (!tokens) {
 		return NULL;
 	}
+	memset(lexer_memory_pool.pool, 0, lexer_memory_pool.capacity);
 
 	size_t code_string_len = strlen(code_string);
 
@@ -170,7 +176,7 @@ lexer_create_tokens(const char *code_string)
 }
 
 void
-lexer_destroy_tokens(lexer_Tokens tokens)
+lexer_destroy_tokens(void)
 {
-	free(tokens);
+	alloc_free(&lexer_memory_pool);
 }

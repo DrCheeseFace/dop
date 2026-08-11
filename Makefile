@@ -45,7 +45,9 @@ TARGET_SPACERS = $(OBJ_DIR)/spacers
 # DO BETTER LOL
 SRC_LIB	 = src/main.c
 
-SRC_TEST_MAIN  = src/test/test.c src/lexer.c
+SRC_TEST_MAIN  = src/test/test.c \
+		 src/lexer.c \
+		 src/posix/alloc.c
 
 SRC_MR_UTILS   = src/mr_utils/src/mrd_debug.c \
 		 src/mr_utils/src/mrl_logger.c \
