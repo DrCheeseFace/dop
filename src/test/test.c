@@ -6,9 +6,8 @@ MRT_TEST_GROUP(sanity_check)
 	MRT_ASSERT(1 == 1, "sanity check");
 
 	lexer_Tokens tokens = lexer_create_tokens("test string");
-	ignore tokens;
 
-	lexer_destroy_tokens();
+	lexer_destroy_tokens(tokens);
 	return;
 }
 
@@ -66,7 +65,7 @@ MRT_TEST_GROUP(test_lexer_basic_tokenize)
 	MRT_ASSERT(tokens[9].type == LEXER_TOKEN_TAG_EOF,
 		   "token 9 = EOF marker");
 
-	lexer_destroy_tokens();
+	lexer_destroy_tokens(tokens);
 }
 
 int

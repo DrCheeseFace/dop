@@ -29,6 +29,9 @@ alloc_alloc(alloc_Pool *pool, size_t size)
 		return NULL;
 	}
 
+#ifdef DEBUG
+	custom_alloc(pool->pool + pool->offset, size);
+#endif //!DEBUG
 	void *alloc_start = pool->pool + pool->offset;
 	pool->offset += size;
 
@@ -43,6 +46,10 @@ alloc_head_expand(alloc_Pool *pool, size_t size)
 	}
 
 	pool->offset += size;
+#ifdef DEBUG
+	custom_realloc(pool->pool + pool->offset, pool->pool + pool->offset,
+		       size);
+#endif //!DEBUG
 	return OK;
 }
 

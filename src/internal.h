@@ -62,7 +62,7 @@ struct lexer_Token {
 typedef struct lexer_Token *lexer_Tokens;
 
 lexer_Tokens lexer_create_tokens(const char *s);
-void lexer_destroy_tokens(void);
+void lexer_destroy_tokens(lexer_Tokens tokens);
 
 //
 // CST
