@@ -29,7 +29,7 @@ endif
 # -DMRD_DEBUG_ONLY_CALLED_AND_ERR
 # -DMRD_DEBUG_BACKTRACE
 ifeq ($(BUILD_TYPE),debug)
-	CFLAGS	   := -O0 -g -fno-omit-frame-pointer -DDEBUG -DMRD_DEBUG_ONLY_CALLED_AND_ERR $(BACKTRACE) $(INCLUDES) $(WARNINGS) $(SANITIZERS)
+	CFLAGS	   := -O0 -g -fno-omit-frame-pointer -DDEBUG -DMRD_DEBUG_DEFAULT $(BACKTRACE) $(INCLUDES) $(WARNINGS) $(SANITIZERS)
 	LDFLAGS	   += -rdynamic
 else
 	CFLAGS	   := -O2 -flto $(WARNINGS) $(INCLUDES)
@@ -47,6 +47,7 @@ SRC_LIB	 = src/main.c
 
 SRC_TEST_MAIN  = src/test/test.c \
 		 src/lexer.c \
+		 src/ast.c \
 		 src/posix/alloc.c
 
 SRC_MR_UTILS   = src/mr_utils/src/mrd_debug.c \

@@ -65,79 +65,86 @@ lexer_Tokens lexer_create_tokens(const char *s);
 void lexer_destroy_tokens(lexer_Tokens tokens);
 
 //
-// CST
+// AST
 //
 
-struct cst_Terminal {
-	struct lexer_Token *token;
-};
+typedef size_t ast_TokenRef;
 
 // expressions
-enum cst_ExpressionKind {
-	CST_EXPRESSION_LITERAL_NUMBER,
-	CST_EXPRESSION_IDENTIFIER,
+enum ast_ExpressionKind {
+	AST_EXPRESSION_KIND_LITERAL_NUMBER,
+	AST_EXPRESSION_KIND_IDENTIFIER,
 };
 
-struct cst_Expression {
-	enum cst_ExpressionKind kind;
-};
-
-struct cst_LiteralExpression {
-	struct cst_Expression base;
-	struct cst_Terminal *value;
-};
-
-struct cst_IdentifierExpression {
-	struct cst_Expression base;
-	struct cst_Terminal *name;
+struct ast_Expression {
+	enum ast_ExpressionKind kind;
+	ast_TokenRef token;
 };
 
 // statements
-enum cst_StatementKind {
-	CST_STATEMENT_RETURN,
+enum ast_StatementKind {
+	AST_STATEMENT_RETURN,
 };
 
-struct cst_Statement {
-	enum cst_StatementKind kind;
+struct ast_Statement {
+	enum ast_StatementKind kind;
+	union {
+		struct {
+			ast_TokenRef return_keyword;
+			struct ast_Expression *expression;
+		} ret;
+	} as;
 };
 
-struct cst_ReturnStatement {
-	struct cst_Statement base;
-	struct cst_Terminal *return_keyword;
-	struct cst_Expression *expression;
-	struct cst_Terminal *semicolon;
+// blocks
+struct ast_Block {
+	struct ast_Statement **items;
+	size_t count;
+	size_t capacity;
 };
 
 // declarations
-enum cst_DeclarationKind {
-	CST_DECLARATION_FUNCTION,
+enum ast_DeclarationKind {
+	AST_DECLARATION_KIND_FUNCTION,
 };
 
-struct cst_Declaration {
-	enum cst_DeclarationKind kind;
-};
-
-struct cst_FunctionDeclaration {
-	struct cst_Declaration base;
-	struct cst_Terminal *return_type;
-	struct cst_Terminal *identifier;
-	struct cst_Terminal *open_paren;
-	struct cst_Terminal *close_paren;
-	struct cst_Block *body;
-};
-
-// block
-struct cst_Block {
-	struct cst_Terminal *open_brace;
-	struct cst_Statement **statements;
-	size_t statement_count;
-	struct cst_Terminal *close_brace;
+struct ast_Declaration {
+	enum ast_DeclarationKind kind;
+	union {
+		struct {
+			ast_TokenRef return_type;
+			ast_TokenRef name;
+			struct ast_Block body;
+		} func;
+	} as;
 };
 
 // program
-struct cst_Program {
-	struct cst_FunctionDeclaration **functions;
-	size_t function_count;
+struct ast_Program {
+	struct ast_Declaration **items;
+	size_t count;
+	size_t capacity;
 };
+
+Err ast_init(void);
+Err ast_free(void);
+
+struct ast_Expression *ast_expression_create(enum ast_ExpressionKind kind,
+					     ast_TokenRef token);
+
+struct ast_Statement *ast_return_statement_create(ast_TokenRef return_keyword,
+						  struct ast_Expression *expr);
+
+struct ast_Block ast_block_init(void);
+void ast_block_push_statement(struct ast_Block *block,
+			      struct ast_Statement *statement);
+
+struct ast_Declaration *
+ast_function_declaration_create(ast_TokenRef return_type, ast_TokenRef name,
+				struct ast_Block body);
+
+struct ast_Program ast_program_init(void);
+void ast_program_push_declaration(struct ast_Program *program,
+				  struct ast_Declaration *declaration);
 
 #endif //_INTERNAL_H
