@@ -13,7 +13,7 @@ MRT_TEST_GROUP(sanity_check)
 
 MRT_TEST_GROUP(test_lexer_basic_tokenize)
 {
-	const char *code_string = "U8 main() {return 3;}";
+	const char *code_string = "u8 main() {return 3;}";
 	lexer_Tokens tokens = lexer_create_tokens(code_string);
 
 	/* expected: [
@@ -71,7 +71,7 @@ MRT_TEST_GROUP(test_lexer_basic_tokenize)
 
 MRT_TEST_GROUP(test_ast_basic_parse)
 {
-	const char *code_string = "U8 main() {return 3;}";
+	const char *code_string = "u8 main() {return 3;}";
 	lexer_Tokens tokens = lexer_create_tokens(code_string);
 
 	ast_init();
@@ -130,7 +130,7 @@ MRT_TEST_GROUP(test_ast_basic_parse)
 
 MRT_TEST_GROUP(test_ast_multiple_statements)
 {
-	const char *code = "U8 foo() {return a; return 42;}";
+	const char *code = "u8 foo() {return a; return 42;}";
 	lexer_Tokens tokens = lexer_create_tokens(code);
 	ast_init();
 
@@ -161,7 +161,7 @@ MRT_TEST_GROUP(test_ast_multiple_statements)
 
 MRT_TEST_GROUP(test_ast_multiple_functions)
 {
-	const char *code_string = "U8 f() {return 1;} U8 g() {return 2;}";
+	const char *code_string = "u8 f() {return 1;} u8 g() {return 2;}";
 	lexer_Tokens tokens = lexer_create_tokens(code_string);
 
 	ast_init();

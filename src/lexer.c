@@ -10,7 +10,7 @@ const char *lexer_token_tag_to_char[LEXER_TOKEN_TAG_COUNT] = {
 	"{",
 	"}",
 	";",
-	"U8",
+	"u8",
 	NO_DEFAULT_TOKEN_VALUE
 };
 
