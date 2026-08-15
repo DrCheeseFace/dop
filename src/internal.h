@@ -83,14 +83,13 @@ struct ast_Expression {
 
 // statements
 enum ast_StatementKind {
-	AST_STATEMENT_RETURN,
+	AST_STATEMENT_KIND_RETURN,
 };
 
 struct ast_Statement {
 	enum ast_StatementKind kind;
 	union {
 		struct {
-			ast_TokenRef return_keyword;
 			struct ast_Expression *expression;
 		} ret;
 	} as;
@@ -129,22 +128,6 @@ struct ast_Program {
 Err ast_init(void);
 Err ast_free(void);
 
-struct ast_Expression *ast_expression_create(enum ast_ExpressionKind kind,
-					     ast_TokenRef token);
-
-struct ast_Statement *ast_return_statement_create(ast_TokenRef return_keyword,
-						  struct ast_Expression *expr);
-
-struct ast_Block ast_block_init(void);
-void ast_block_push_statement(struct ast_Block *block,
-			      struct ast_Statement *statement);
-
-struct ast_Declaration *
-ast_function_declaration_create(ast_TokenRef return_type, ast_TokenRef name,
-				struct ast_Block body);
-
-struct ast_Program ast_program_init(void);
-void ast_program_push_declaration(struct ast_Program *program,
-				  struct ast_Declaration *declaration);
+struct ast_Program ast_parse_tokens(lexer_Tokens tokens);
 
 #endif //_INTERNAL_H
