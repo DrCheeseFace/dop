@@ -4,6 +4,7 @@
 #define _DEFAULT_SOURCE
 #include <unistd.h>
 
+#include <llvm-c/Core.h>
 #include <mr_utils.h>
 #include <stdint.h>
 #include <stdio.h>

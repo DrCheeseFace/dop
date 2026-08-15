@@ -1,12 +1,20 @@
+# EDIT THIS
+LLVM_CONFIG := /home/tharun/Projects/llvm/build/bin/llvm-config
+
+LLVM_CFLAGS  := $(shell $(LLVM_CONFIG) --cflags)
+LLVM_LDFLAGS = $(shell $(LLVM_CONFIG) --ldflags)
+LLVM_LIBS    = $(shell $(LLVM_CONFIG) --libs core irreader)
+LLVM_SYSLIBS = $(shell $(LLVM_CONFIG) --system-libs)
+LLVM_RPATH   := -Wl,-rpath,$(shell $(LLVM_CONFIG) --libdir)
+
 CC	    = clang
 CSTANDARD   = c99
 
 INCLUDES    = -Iinclude -Isrc/mr_utils/include
-LDLIBS	    = -lm
-LDFLAGS	    =
+LDLIBS      = -lm $(LLVM_LIBS) $(LLVM_SYSLIBS)
+LDFLAGS     = $(LLVM_LDFLAGS) $(LLVM_RPATH)
 
-# SANITIZERS = -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
-# LDLIBS    += $(SANITIZERS)
+SANITIZERS = -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
 
 WARNINGS  = -Wall -Wextra -Werror -Wpedantic -pedantic-errors
 WARNINGS += -Wpointer-arith -Wcast-align -Wwrite-strings
@@ -29,11 +37,14 @@ endif
 # -DMRD_DEBUG_ONLY_CALLED_AND_ERR
 # -DMRD_DEBUG_BACKTRACE
 ifeq ($(BUILD_TYPE),debug)
-	CFLAGS	   := -O0 -g -fno-omit-frame-pointer -DDEBUG -DMRD_DEBUG_DEFAULT $(BACKTRACE) $(INCLUDES) $(WARNINGS) $(SANITIZERS)
-	LDFLAGS	   += -rdynamic
+	CFLAGS	   := -O0 -g -DDEBUG -DMRD_DEBUG_DEFAULT $(BACKTRACE) $(INCLUDES) $(WARNINGS) $(SANITIZERS)
+	LDFLAGS += -rdynamic $(SANITIZERS)
 else
-	CFLAGS	   := -O2 -flto $(WARNINGS) $(INCLUDES)
+	CFLAGS  := -O2 -flto $(WARNINGS) $(INCLUDES)
+	LDFLAGS += -flto
 endif
+
+CFLAGS += $(LLVM_CFLAGS)
 
 BUILD_DIR := build
 OBJ_DIR	  := $(BUILD_DIR)/$(BUILD_TYPE)
