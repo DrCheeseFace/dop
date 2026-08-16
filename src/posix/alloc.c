@@ -19,19 +19,22 @@ alloc_init(alloc_Pool *pool, size_t capacity)
 	return OK;
 }
 
-// @TODO aligned alloc
 // @TODO expand on hitting capacity?
 void *
 alloc_alloc(alloc_Pool *pool, size_t size)
 {
-	if (pool->offset + size > pool->capacity) {
-		return NULL;
+	size_t align = sizeof(void *);
+	size_t mask = align - 1;
+
+	size_t aligned_offset = (pool->offset + mask) & ~mask;
+
+	if (aligned_offset + size > pool->capacity) {
+		return NULL; // OOM
 	}
 
-	void *alloc_start = pool->pool + pool->offset;
-	pool->offset += size;
-
-	return alloc_start;
+	void *ptr = pool->pool + aligned_offset;
+	pool->offset = aligned_offset + size;
+	return ptr;
 }
 
 Err

@@ -16,12 +16,12 @@ ast_free(void)
 }
 
 internal_function struct ast_Expression *
-ast_expression_create(enum ast_ExpressionKind kind, ast_TokenRef token)
+ast_expression_create(enum ast_ExpressionKind kind, ast_Identifier value)
 {
 	struct ast_Expression *expression = ast_alloc(sizeof(*expression));
 
 	expression->kind = kind;
-	expression->token = token;
+	strcpy((char *)expression->value, (char *)value);
 
 	return expression;
 }
@@ -69,13 +69,14 @@ ast_block_push_statement(struct ast_Block *block,
 }
 
 internal_function struct ast_Declaration *
-ast_function_declaration_create(ast_TokenRef return_type, ast_TokenRef name,
+ast_function_declaration_create(enum ast_Type return_type, ast_Identifier name,
 				struct ast_Block body)
 {
 	struct ast_Declaration *new_func = ast_alloc(sizeof(*new_func));
+
 	new_func->kind = AST_DECLARATION_KIND_FUNCTION;
 	new_func->as.func.return_type = return_type;
-	new_func->as.func.name = name;
+	strcpy((char *)new_func->as.func.name, (char *)name);
 	new_func->as.func.body = body;
 
 	return new_func;
@@ -110,15 +111,22 @@ ast_program_push_declaration(struct ast_Program *program,
 	program->count++;
 }
 
+typedef size_t ast_TokenRef;
 typedef struct {
 	lexer_Tokens tokens;
-	size_t pos;
+	ast_TokenRef pos;
 } Parser;
 
 internal_function struct lexer_Token *
 ast_parser_peek(Parser *p)
 {
 	return &p->tokens[p->pos];
+}
+
+internal_function struct lexer_Token *
+ast_parser_peek_at(Parser *p, ast_TokenRef ref)
+{
+	return &p->tokens[ref];
 }
 
 /* internal_function Bool */
@@ -149,14 +157,18 @@ ast_parse_expression(Parser *p)
 	if (ast_parser_peek(p)->type == LEXER_TOKEN_TAG_LITERAL_NUM) {
 		ast_TokenRef literal =
 			ast_parser_expect(p, LEXER_TOKEN_TAG_LITERAL_NUM);
+		struct lexer_Token *literal_token =
+			ast_parser_peek_at(p, literal);
 		return ast_expression_create(AST_EXPRESSION_KIND_LITERAL_NUMBER,
-					     literal);
+					     literal_token->value);
 	} else if (ast_parser_peek(p)->type ==
 		   LEXER_TOKEN_TAG_LITERAL_IDENTIFIER) {
 		ast_TokenRef identifier = ast_parser_expect(
 			p, LEXER_TOKEN_TAG_LITERAL_IDENTIFIER);
+		struct lexer_Token *identifier_token =
+			ast_parser_peek_at(p, identifier);
 		return ast_expression_create(AST_EXPRESSION_KIND_IDENTIFIER,
-					     identifier);
+					     identifier_token->value);
 	}
 
 	fprintf(stderr, "parse error: expected expression at token %zu\n",
@@ -199,10 +211,14 @@ ast_parse_block(Parser *p)
 internal_function struct ast_Declaration *
 ast_parse_function_declaration(Parser *p)
 {
-	ast_TokenRef function_return_type =
-		ast_parser_expect(p, LEXER_TOKEN_TAG_TYPE_U8);
+	// @TODO hard coded type shit
+	ast_parser_expect(p, LEXER_TOKEN_TAG_TYPE_U8);
+
 	ast_TokenRef function_identifier =
 		ast_parser_expect(p, LEXER_TOKEN_TAG_LITERAL_IDENTIFIER);
+
+	struct lexer_Token *function_identifier_token =
+		ast_parser_peek_at(p, function_identifier);
 
 	ast_parser_expect(p, LEXER_TOKEN_TAG_DELIM_OPENPAREN);
 	ast_parser_expect(p, LEXER_TOKEN_TAG_DELIM_CLOSEPAREN);
@@ -210,7 +226,7 @@ ast_parse_function_declaration(Parser *p)
 	struct ast_Block function_body = ast_parse_block(p);
 
 	return ast_function_declaration_create(
-		function_return_type, function_identifier, function_body);
+		AST_TYPE_U8, function_identifier_token->value, function_body);
 }
 
 internal_function struct ast_Declaration *

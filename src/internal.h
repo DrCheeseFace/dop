@@ -69,8 +69,6 @@ void lexer_destroy_tokens(lexer_Tokens tokens);
 // AST
 //
 
-typedef size_t ast_TokenRef;
-
 // expressions
 enum ast_ExpressionKind {
 	AST_EXPRESSION_KIND_LITERAL_NUMBER,
@@ -79,7 +77,7 @@ enum ast_ExpressionKind {
 
 struct ast_Expression {
 	enum ast_ExpressionKind kind;
-	ast_TokenRef token;
+	ast_Identifier value;
 };
 
 // statements
@@ -108,12 +106,15 @@ enum ast_DeclarationKind {
 	AST_DECLARATION_KIND_FUNCTION,
 };
 
+enum ast_Type { AST_TYPE_U8 };
+
 struct ast_Declaration {
 	enum ast_DeclarationKind kind;
 	union {
 		struct {
-			ast_TokenRef return_type;
-			ast_TokenRef name;
+			// @TODO inefficient as heck
+			enum ast_Type return_type;
+			ast_Identifier name;
 			struct ast_Block body;
 		} func;
 	} as;
@@ -130,5 +131,12 @@ Err ast_init(void);
 Err ast_free(void);
 
 struct ast_Program ast_parse_tokens(lexer_Tokens tokens);
+
+//
+// IR
+//
+/* void ir_create(struct ast_Program program); */
+
+void ir_test(void);
 
 #endif //_INTERNAL_H

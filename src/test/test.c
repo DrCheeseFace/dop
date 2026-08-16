@@ -4,11 +4,6 @@
 MRT_TEST_GROUP(sanity_check)
 {
 	MRT_ASSERT(1 == 1, "sanity check");
-
-	lexer_Tokens tokens = lexer_create_tokens("test string");
-
-	lexer_destroy_tokens(tokens);
-	return;
 }
 
 MRT_TEST_GROUP(test_lexer_basic_tokenize)
@@ -96,14 +91,9 @@ MRT_TEST_GROUP(test_ast_basic_parse)
 
 	MRT_ASSERT(program.items[0]->kind == AST_DECLARATION_KIND_FUNCTION,
 		   "function declaration kind");
-	MRT_ASSERT(tokens[program.items[0]->as.func.return_type].type ==
-			   LEXER_TOKEN_TAG_TYPE_U8,
+	MRT_ASSERT(program.items[0]->as.func.return_type == AST_TYPE_U8,
 		   "function declaration return type");
-	MRT_ASSERT(tokens[program.items[0]->as.func.name].type ==
-			   LEXER_TOKEN_TAG_LITERAL_IDENTIFIER,
-		   "function declaration identifier type");
-	MRT_ASSERT(strcmp((const char *)tokens[program.items[0]->as.func.name]
-				  .value,
+	MRT_ASSERT(strcmp((const char *)program.items[0]->as.func.name,
 			  "main") == 0,
 		   "function declaration identifier name");
 
@@ -118,10 +108,9 @@ MRT_TEST_GROUP(test_ast_basic_parse)
 				   ->as.ret.expression->kind ==
 			   AST_EXPRESSION_KIND_LITERAL_NUMBER,
 		   "statement expression kind");
-	MRT_ASSERT(strcmp((char *)tokens[program.items[0]
-						 ->as.func.body.items[0]
-						 ->as.ret.expression->token]
-				  .value,
+	MRT_ASSERT(strcmp((char *)program.items[0]
+				  ->as.func.body.items[0]
+				  ->as.ret.expression->value,
 			  "3") == 0,
 		   "statement expression token value");
 	ast_free();
@@ -145,8 +134,7 @@ MRT_TEST_GROUP(test_ast_multiple_statements)
 	MRT_ASSERT(s1->as.ret.expression->kind ==
 			   AST_EXPRESSION_KIND_IDENTIFIER,
 		   "expr 1 is identifier");
-	MRT_ASSERT(strcmp((char *)tokens[s1->as.ret.expression->token].value,
-			  "a") == 0,
+	MRT_ASSERT(strcmp((char *)s1->as.ret.expression->value, "a") == 0,
 		   "identifier value");
 
 	// return number
@@ -174,16 +162,11 @@ MRT_TEST_GROUP(test_ast_multiple_functions)
 	MRT_ASSERT(program.items[0]->kind == AST_DECLARATION_KIND_FUNCTION,
 		   "first declaration is a function");
 
-	MRT_ASSERT(tokens[program.items[0]->as.func.return_type].type ==
-			   LEXER_TOKEN_TAG_TYPE_U8,
+	MRT_ASSERT(program.items[0]->as.func.return_type == AST_TYPE_U8,
 		   "first function return type is U8");
 
-	MRT_ASSERT(tokens[program.items[0]->as.func.name].type ==
-			   LEXER_TOKEN_TAG_LITERAL_IDENTIFIER,
-		   "first function name is identifier");
-	MRT_ASSERT(strcmp((const char *)tokens[program.items[0]->as.func.name]
-				  .value,
-			  "f") == 0,
+	MRT_ASSERT(strcmp((const char *)program.items[0]->as.func.name, "f") ==
+			   0,
 		   "first function name is 'f'");
 
 	MRT_ASSERT(program.items[0]->as.func.body.count == 1,
@@ -195,10 +178,9 @@ MRT_TEST_GROUP(test_ast_multiple_functions)
 				   ->as.ret.expression->kind ==
 			   AST_EXPRESSION_KIND_LITERAL_NUMBER,
 		   "first function return expression is literal number");
-	MRT_ASSERT(strcmp((char *)tokens[program.items[0]
-						 ->as.func.body.items[0]
-						 ->as.ret.expression->token]
-				  .value,
+	MRT_ASSERT(strcmp((char *)program.items[0]
+				  ->as.func.body.items[0]
+				  ->as.ret.expression->value,
 			  "1") == 0,
 		   "first function returns literal '1'");
 
@@ -206,16 +188,11 @@ MRT_TEST_GROUP(test_ast_multiple_functions)
 	MRT_ASSERT(program.items[1]->kind == AST_DECLARATION_KIND_FUNCTION,
 		   "second declaration is a function");
 
-	MRT_ASSERT(tokens[program.items[1]->as.func.return_type].type ==
-			   LEXER_TOKEN_TAG_TYPE_U8,
+	MRT_ASSERT(program.items[1]->as.func.return_type == AST_TYPE_U8,
 		   "second function return type is U8");
 
-	MRT_ASSERT(tokens[program.items[1]->as.func.name].type ==
-			   LEXER_TOKEN_TAG_LITERAL_IDENTIFIER,
-		   "second function name is identifier");
-	MRT_ASSERT(strcmp((const char *)tokens[program.items[1]->as.func.name]
-				  .value,
-			  "g") == 0,
+	MRT_ASSERT(strcmp((const char *)program.items[1]->as.func.name, "g") ==
+			   0,
 		   "second function name is 'g'");
 
 	MRT_ASSERT(program.items[1]->as.func.body.count == 1,
@@ -227,10 +204,9 @@ MRT_TEST_GROUP(test_ast_multiple_functions)
 				   ->as.ret.expression->kind ==
 			   AST_EXPRESSION_KIND_LITERAL_NUMBER,
 		   "second function return expression is literal number");
-	MRT_ASSERT(strcmp((char *)tokens[program.items[1]
-						 ->as.func.body.items[0]
-						 ->as.ret.expression->token]
-				  .value,
+	MRT_ASSERT(strcmp((char *)program.items[1]
+				  ->as.func.body.items[0]
+				  ->as.ret.expression->value,
 			  "2") == 0,
 		   "second function returns literal '2'");
 
@@ -243,6 +219,8 @@ main(void)
 {
 	MrlLogger *logger = mrl_create(stderr, TRUE, FALSE);
 	MrtContext *ctx = mrt_ctx_create(logger);
+
+	/* ir_test(); */
 
 	MRT_REGISTER_TEST_GROUP(ctx, sanity_check);
 	MRT_REGISTER_TEST_GROUP(ctx, test_lexer_basic_tokenize);
