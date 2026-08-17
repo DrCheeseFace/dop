@@ -1,84 +1,29 @@
-# EDIT THIS
-LLVM_CONFIG := /home/tharun/Projects/llvm/build/bin/llvm-config
+SRC_LIB      := src/main.c
 
-LLVM_CFLAGS  := $(shell $(LLVM_CONFIG) --cflags)
-LLVM_LDFLAGS = $(shell $(LLVM_CONFIG) --ldflags)
-LLVM_LIBS    = $(shell $(LLVM_CONFIG) --libs core irreader)
-LLVM_SYSLIBS = $(shell $(LLVM_CONFIG) --system-libs)
-LLVM_RPATH   := -Wl,-rpath,$(shell $(LLVM_CONFIG) --libdir)
+SRC_TEST_MAIN := src/test/test.c \
+                 src/lexer.c \
+                 src/ast.c \
+                 src/ir.c \
+                 src/posix/alloc.c
 
-CC	    = clang
-CSTANDARD   = c99
+SRC_MR_UTILS  := src/mr_utils/src/mrd_debug.c \
+                 src/mr_utils/src/mrl_logger.c \
+                 src/mr_utils/src/mrs_strings.c \
+                 src/mr_utils/src/mrt_test.c \
+                 src/mr_utils/src/mrv_vectors.c
 
-INCLUDES    = -Iinclude -Isrc/mr_utils/include
-LDLIBS      = -lm $(LLVM_LIBS) $(LLVM_SYSLIBS)
-LDFLAGS     = $(LLVM_LDFLAGS) $(LLVM_RPATH)
+SRC_SPACERS   := src/mr_utils/tools/spacers.c
 
-SANITIZERS = -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
+OBJ_LIB       := $(SRC_LIB:%.c=$(OBJ_DIR)/%.o)
+OBJ_TEST_MAIN := $(SRC_TEST_MAIN:%.c=$(OBJ_DIR)/%.o)
+OBJ_MR_UTILS  := $(SRC_MR_UTILS:%.c=$(OBJ_DIR)/%.o)
+OBJ_SPACERS   := $(SRC_SPACERS:%.c=$(OBJ_DIR)/%.o)
 
-WARNINGS  = -Wall -Wextra -Werror -Wpedantic -pedantic-errors
-WARNINGS += -Wpointer-arith -Wcast-align -Wwrite-strings
-WARNINGS += -Wstrict-prototypes
-WARNINGS += -Wswitch-default -Wunreachable-code
-WARNINGS += -Wbad-function-cast -Wcast-qual -Wundef
-WARNINGS += -Wshadow -Wfloat-equal -Wformat=2
-WARNINGS += -Wredundant-decls -Wnested-externs
-WARNINGS += -Wnull-dereference
+ALL_MAIN_OBJS    := $(OBJ_LIB) $(OBJ_MR_UTILS)
+ALL_TEST_OBJS    := $(OBJ_TEST_MAIN) $(OBJ_MR_UTILS)
+ALL_SPACERS_OBJS := $(OBJ_MR_UTILS) $(OBJ_SPACERS)
 
-WARNINGS += -fcolor-diagnostics
-
-BUILD_TYPE ?= release
-
-ifneq (,$(filter debug build-debug build-test-debug test-debug,$(MAKECMDGOALS)))
-	BUILD_TYPE := debug
-endif
-
-# -DMRD_DEBUG_DEFAULT
-# -DMRD_DEBUG_ONLY_CALLED_AND_ERR
-# -DMRD_DEBUG_BACKTRACE
-ifeq ($(BUILD_TYPE),debug)
-	CFLAGS	   := -O0 -g -DDEBUG -DMRD_DEBUG_DEFAULT $(BACKTRACE) $(INCLUDES) $(WARNINGS) $(SANITIZERS)
-	LDFLAGS += -rdynamic $(SANITIZERS)
-else
-	CFLAGS  := -O2 -flto $(WARNINGS) $(INCLUDES)
-	LDFLAGS += -flto
-endif
-
-CFLAGS += $(LLVM_CFLAGS)
-
-BUILD_DIR := build
-OBJ_DIR	  := $(BUILD_DIR)/$(BUILD_TYPE)
-
-TARGET_MAIN    = $(OBJ_DIR)/main.out
-TARGET_TEST    = $(OBJ_DIR)/test.out
-TARGET_SPACERS = $(OBJ_DIR)/spacers
-
-# DO BETTER LOL
-SRC_LIB	 = src/main.c
-
-SRC_TEST_MAIN  = src/test/test.c \
-		 src/lexer.c \
-		 src/ast.c \
-		 src/posix/alloc.c
-
-SRC_MR_UTILS   = src/mr_utils/src/mrd_debug.c \
-		 src/mr_utils/src/mrl_logger.c \
-		 src/mr_utils/src/mrs_strings.c \
-		 src/mr_utils/src/mrt_test.c \
-		 src/mr_utils/src/mrv_vectors.c
-
-SRC_SPACERS    = src/mr_utils/tools/spacers.c
-
-OBJ_LIB	       = $(SRC_LIB:%.c=$(OBJ_DIR)/%.o)
-OBJ_TEST_MAIN  = $(SRC_TEST_MAIN:%.c=$(OBJ_DIR)/%.o)
-OBJ_MR_UTILS   = $(SRC_MR_UTILS:%.c=$(OBJ_DIR)/%.o)
-OBJ_SPACERS    = $(SRC_SPACERS:%.c=$(OBJ_DIR)/%.o)
-
-ALL_MAIN_OBJS	 = $(OBJ_LIB) $(OBJ_MR_UTILS)
-ALL_TEST_OBJS	 = $(OBJ_TEST_MAIN) $(OBJ_MR_UTILS)
-ALL_SPACERS_OBJS = $(OBJ_MR_UTILS) $(OBJ_SPACERS)
-
-.PHONY: all test run clean format format-check debug build-debug spacers tags
+.PHONY: all test run clean format format-check debug build-debug build-test-debug test-debug spacers valgrind record tags
 
 all: $(TARGET_TEST) $(TARGET_SPACERS)
 
@@ -95,7 +40,7 @@ $(OBJ_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) -MD -c $< -o $@ -std=$(CSTANDARD) $(CFLAGS)
 
-test: tags $(TARGET_TEST)
+test: $(TARGET_TEST)
 	./$(TARGET_TEST)
 
 run: $(TARGET_MAIN)
@@ -131,6 +76,9 @@ valgrind:
 record:
 	perf record -g --call-graph dwarf $(TARGET_TEST)
 	perf script > chombo.perf
+
+tags:
+	ctags -e -R src/ test/
 
 -include $(ALL_TEST_OBJS:.o=.d)
 -include $(OBJ_SPACERS:.o=.d)

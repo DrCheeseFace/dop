@@ -127,10 +127,21 @@ struct ast_Program {
 	size_t capacity;
 };
 
-Err ast_init(void);
-Err ast_free(void);
+typedef size_t ast_TokenRef;
+typedef struct {
+	lexer_Tokens tokens;
+	ast_TokenRef pos;
+} ast_Parser;
 
-struct ast_Program ast_parse_tokens(lexer_Tokens tokens);
+typedef struct {
+	ast_Parser p;
+	alloc_Pool memory_pool;
+} ast_Context;
+
+Err ast_init(ast_Context *ctx);
+Err ast_free(ast_Context ctx);
+
+struct ast_Program ast_parse_tokens(ast_Context *ctx, lexer_Tokens tokens);
 
 //
 // IR

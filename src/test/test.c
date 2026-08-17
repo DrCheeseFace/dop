@@ -69,8 +69,10 @@ MRT_TEST_GROUP(test_ast_basic_parse)
 	const char *code_string = "u8 main() {return 3;}";
 	lexer_Tokens tokens = lexer_create_tokens(code_string);
 
-	ast_init();
-	struct ast_Program program = ast_parse_tokens(tokens);
+	ast_Context ctx;
+	MRT_ASSERT(ast_init(&ctx) == OK, "ast_init OK");
+
+	struct ast_Program program = ast_parse_tokens(&ctx, tokens);
 	/* expected
          * program[0]
          *   funcdecl
@@ -114,7 +116,7 @@ MRT_TEST_GROUP(test_ast_basic_parse)
 				  ->as.ret.expression->value,
 			  "3") == 0,
 		   "statement expression token value");
-	ast_free();
+	ast_free(ctx);
 }
 
 MRT_TEST_GROUP(test_ast_multiple_statements)
@@ -122,8 +124,10 @@ MRT_TEST_GROUP(test_ast_multiple_statements)
 	const char *code = "u8 foo() {return a; return 42;}";
 	lexer_Tokens tokens = lexer_create_tokens(code);
 
-	ast_init();
-	struct ast_Program program = ast_parse_tokens(tokens);
+	ast_Context ctx;
+	MRT_ASSERT(ast_init(&ctx) == OK, "ast_init OK");
+
+	struct ast_Program program = ast_parse_tokens(&ctx, tokens);
 
 	lexer_destroy_tokens(tokens);
 
@@ -145,7 +149,7 @@ MRT_TEST_GROUP(test_ast_multiple_statements)
 			   AST_EXPRESSION_KIND_LITERAL_NUMBER,
 		   "expr 2 is number");
 
-	ast_free();
+	ast_free(ctx);
 }
 
 MRT_TEST_GROUP(test_ast_multiple_functions)
@@ -153,8 +157,10 @@ MRT_TEST_GROUP(test_ast_multiple_functions)
 	const char *code_string = "u8 f() {return 1;} u8 g() {return 2;}";
 	lexer_Tokens tokens = lexer_create_tokens(code_string);
 
-	ast_init();
-	struct ast_Program program = ast_parse_tokens(tokens);
+	ast_Context ctx;
+	MRT_ASSERT(ast_init(&ctx) == OK, "ast_init OK");
+
+	struct ast_Program program = ast_parse_tokens(&ctx, tokens);
 
 	lexer_destroy_tokens(tokens);
 
@@ -212,7 +218,7 @@ MRT_TEST_GROUP(test_ast_multiple_functions)
 			  "2") == 0,
 		   "second function returns literal '2'");
 
-	ast_free();
+	ast_free(ctx);
 }
 
 int
@@ -220,8 +226,6 @@ main(void)
 {
 	MrlLogger *logger = mrl_create(stderr, TRUE, FALSE);
 	MrtContext *ctx = mrt_ctx_create(logger);
-
-	/* ir_test(); */
 
 	MRT_REGISTER_TEST_GROUP(ctx, sanity_check);
 	MRT_REGISTER_TEST_GROUP(ctx, test_lexer_basic_tokenize);
