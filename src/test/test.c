@@ -70,7 +70,7 @@ MRT_TEST_GROUP(test_ast_basic_parse)
 	lexer_Tokens tokens = lexer_create_tokens(code_string);
 
 	ast_init();
-
+	struct ast_Program program = ast_parse_tokens(tokens);
 	/* expected
          * program[0]
          *   funcdecl
@@ -84,7 +84,8 @@ MRT_TEST_GROUP(test_ast_basic_parse)
          *                      expr literal_number
          *                        token: token[6]  (literal_num "3")
          */
-	struct ast_Program program = ast_parse_tokens(tokens);
+
+	lexer_destroy_tokens(tokens);
 
 	MRT_ASSERT(program.count == 1, "program declaration count = 1");
 	MRT_ASSERT(program.capacity == 4, "program declaration cap = 4");
@@ -114,16 +115,17 @@ MRT_TEST_GROUP(test_ast_basic_parse)
 			  "3") == 0,
 		   "statement expression token value");
 	ast_free();
-	lexer_destroy_tokens(tokens);
 }
 
 MRT_TEST_GROUP(test_ast_multiple_statements)
 {
 	const char *code = "u8 foo() {return a; return 42;}";
 	lexer_Tokens tokens = lexer_create_tokens(code);
-	ast_init();
 
+	ast_init();
 	struct ast_Program program = ast_parse_tokens(tokens);
+
+	lexer_destroy_tokens(tokens);
 
 	MRT_ASSERT(program.count == 1, "one decl");
 	MRT_ASSERT(program.items[0]->as.func.body.count == 2, "two stmts");
@@ -144,7 +146,6 @@ MRT_TEST_GROUP(test_ast_multiple_statements)
 		   "expr 2 is number");
 
 	ast_free();
-	lexer_destroy_tokens(tokens);
 }
 
 MRT_TEST_GROUP(test_ast_multiple_functions)
@@ -153,8 +154,9 @@ MRT_TEST_GROUP(test_ast_multiple_functions)
 	lexer_Tokens tokens = lexer_create_tokens(code_string);
 
 	ast_init();
-
 	struct ast_Program program = ast_parse_tokens(tokens);
+
+	lexer_destroy_tokens(tokens);
 
 	MRT_ASSERT(program.count == 2, "program declaration count = 2");
 
@@ -211,7 +213,6 @@ MRT_TEST_GROUP(test_ast_multiple_functions)
 		   "second function returns literal '2'");
 
 	ast_free();
-	lexer_destroy_tokens(tokens);
 }
 
 int
