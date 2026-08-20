@@ -85,12 +85,14 @@ enum ast_StatementKind {
 	AST_STATEMENT_KIND_RETURN,
 };
 
+struct ast_ReturnStatement {
+	struct ast_Expression *expression;
+};
+
 struct ast_Statement {
 	enum ast_StatementKind kind;
 	union {
-		struct {
-			struct ast_Expression *expression;
-		} ret;
+		struct ast_ReturnStatement ret;
 	} as;
 };
 
@@ -108,15 +110,17 @@ enum ast_DeclarationKind {
 
 enum ast_Type { AST_TYPE_U8 };
 
+struct ast_FunctionDeclaration {
+	// @TODO inefficient as heck
+	enum ast_Type return_type;
+	ast_Identifier name;
+	struct ast_Block body;
+};
+
 struct ast_Declaration {
 	enum ast_DeclarationKind kind;
 	union {
-		struct {
-			// @TODO inefficient as heck
-			enum ast_Type return_type;
-			ast_Identifier name;
-			struct ast_Block body;
-		} func;
+		struct ast_FunctionDeclaration func;
 	} as;
 };
 
@@ -146,8 +150,6 @@ struct ast_Program ast_parse_tokens(ast_Context *ctx, lexer_Tokens tokens);
 //
 // IR
 //
-/* void ir_create(struct ast_Program program); */
-
-void ir_test(void);
+void ir_create(struct ast_Program program);
 
 #endif //_INTERNAL_H

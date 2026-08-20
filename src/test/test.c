@@ -221,6 +221,23 @@ MRT_TEST_GROUP(test_ast_multiple_functions)
 	ast_free(ctx);
 }
 
+MRT_TEST_GROUP(test_compile_return_only)
+{
+	const char *code_string = "u8 main(){return 1;}";
+	lexer_Tokens tokens = lexer_create_tokens(code_string);
+
+	ast_Context ctx;
+	MRT_ASSERT(ast_init(&ctx) == OK, "ast_init OK");
+
+	struct ast_Program ast = ast_parse_tokens(&ctx, tokens);
+
+	lexer_destroy_tokens(tokens);
+
+	ir_create(ast);
+
+	ast_free(ctx);
+}
+
 int
 main(void)
 {
@@ -232,6 +249,8 @@ main(void)
 	MRT_REGISTER_TEST_GROUP(ctx, test_ast_basic_parse);
 	MRT_REGISTER_TEST_GROUP(ctx, test_ast_multiple_statements);
 	MRT_REGISTER_TEST_GROUP(ctx, test_ast_multiple_functions);
+
+	MRT_REGISTER_TEST_GROUP(ctx, test_compile_return_only);
 
 #ifdef DEBUG
 	Err err = mrt_ctx_run(ctx, FALSE);
