@@ -161,7 +161,7 @@ ast_parser_expect(ast_Context *ctx, enum lexer_TokenTag type)
 {
 	if (ast_parser_peek(ctx)->type != type) {
 		// @TODO error handling
-		fprintf(stderr, "parse error at token %zu\n", ctx->p.pos);
+		fprintf(stderr, "ast error: parse error at token %zu\n", ctx->p.pos);
 		exit(1);
 	}
 
@@ -190,7 +190,7 @@ ast_parse_expression(ast_Context *ctx)
 					     identifier_token->value);
 	}
 
-	fprintf(stderr, "parse error: expected expression at token %zu\n",
+	fprintf(stderr, "ast error: parse error: expected expression at token %zu\n",
 		ctx->p.pos);
 	exit(1);
 }
@@ -205,7 +205,7 @@ ast_parse_statement(ast_Context *ctx)
 		return ast_return_statement_create(ctx, expression);
 	}
 
-	fprintf(stderr, "parse error: expected statement at token %zu\n",
+	fprintf(stderr, "ast error: parse error: expected statement at token %zu\n",
 		ctx->p.pos);
 	exit(1);
 }
