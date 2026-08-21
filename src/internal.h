@@ -85,6 +85,7 @@ enum ast_StatementKind {
 	AST_STATEMENT_KIND_RETURN,
 };
 
+// @TODO add stuff to track type and data and stuff
 struct ast_ReturnStatement {
 	struct ast_Expression *expression;
 };

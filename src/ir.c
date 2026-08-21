@@ -31,11 +31,12 @@ ir_add_function_declaration(struct ast_FunctionDeclaration func,
 	LLVMPositionBuilderAtEnd(builder, entry);
 
 	for (size_t i = 0; i < func.body.count; i++) {
+		//@TODO refactor ast_ReturnStatement to include information about type to avoid this TRAAAASH
 		if (func.body.items[i]->kind == AST_STATEMENT_KIND_RETURN) {
 			LLVMBuildRet(
 				builder,
 				LLVMConstInt(return_type,
-					     atoll((char*)func.body.items[i]
+					     atoll((char *)func.body.items[i]
 							   ->as.ret.expression
 							   ->value),
 					     FALSE));
