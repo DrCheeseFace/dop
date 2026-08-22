@@ -1,5 +1,6 @@
 #include "./internal.h"
 
+// @TODO add checks for expected type and size of literal
 internal_function struct ast_Type *
 ast_typecheck_expression(ast_Context *ctx, struct ast_Expression *expr)
 {

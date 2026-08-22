@@ -28,7 +28,7 @@ ast_expression_create(ast_Context *ctx, enum ast_ExpressionKind kind,
 
 	if (kind == AST_EXPRESSION_KIND_LITERAL_NUMBER) {
 		expression->as.number =
-			(uint8_t)strtoul((char *)value, NULL, 10);
+			strtoull((char *)value, NULL, 10);
 	} else if (kind == AST_EXPRESSION_KIND_IDENTIFIER) {
 		strcpy((char *)expression->as.identifier, (char *)value);
 	}

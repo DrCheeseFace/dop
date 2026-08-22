@@ -80,7 +80,7 @@ struct ast_Expression {
 	struct ast_Type *type;
 	union {
 		ast_Identifier identifier;
-		uint8_t number;
+		uint64_t number;
 	} as;
 };
 
