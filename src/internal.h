@@ -69,6 +69,25 @@ void lexer_destroy_tokens(lexer_Tokens tokens);
 // AST
 //
 
+// types
+enum ast_TypeKind {
+	AST_TYPE_KIND_PRIMITIVE,
+	// AST_TYPE_KIND_POINTER,
+	// AST_TYPE_KIND_ARRAY,
+};
+
+enum ast_TypePrimitive {
+	AST_TYPE_PRIMITIVE_VOID,
+	AST_TYPE_PRIMITIVE_U8,
+};
+
+struct ast_Type {
+	enum ast_TypeKind kind;
+	union {
+		enum ast_TypePrimitive primitive;
+	} as;
+};
+
 // expressions
 enum ast_ExpressionKind {
 	AST_EXPRESSION_KIND_LITERAL_NUMBER,
@@ -77,7 +96,7 @@ enum ast_ExpressionKind {
 
 struct ast_Expression {
 	enum ast_ExpressionKind kind;
-	struct ast_Type *type;
+	struct ast_Type type;
 	union {
 		ast_Identifier identifier;
 		uint64_t number;
@@ -113,26 +132,8 @@ enum ast_DeclarationKind {
 	AST_DECLARATION_KIND_FUNCTION,
 };
 
-enum ast_TypeKind {
-	AST_TYPE_KIND_PRIMITIVE,
-	// AST_TYPE_KIND_POINTER,
-	// AST_TYPE_KIND_ARRAY,
-};
-
-enum ast_TypePrimitive {
-	AST_TYPE_PRIMITIVE_VOID,
-	AST_TYPE_PRIMITIVE_U8,
-};
-
-struct ast_Type {
-	enum ast_TypeKind kind;
-	union {
-		enum ast_TypePrimitive primitive;
-	} as;
-};
-
 struct ast_FunctionDeclaration {
-	struct ast_Type *return_type;
+	struct ast_Type return_type;
 	ast_Identifier name;
 	struct ast_Block body;
 };

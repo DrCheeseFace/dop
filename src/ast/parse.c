@@ -24,11 +24,9 @@ ast_expression_create(ast_Context *ctx, enum ast_ExpressionKind kind,
 	}
 
 	expression->kind = kind;
-	expression->type = NULL;
 
 	if (kind == AST_EXPRESSION_KIND_LITERAL_NUMBER) {
-		expression->as.number =
-			strtoull((char *)value, NULL, 10);
+		expression->as.number = strtoull((char *)value, NULL, 10);
 	} else if (kind == AST_EXPRESSION_KIND_IDENTIFIER) {
 		strcpy((char *)expression->as.identifier, (char *)value);
 	}
@@ -86,7 +84,7 @@ ast_block_push_statement(ast_Context *ctx, struct ast_Block *block,
 }
 
 internal_function struct ast_Declaration *
-ast_function_declaration_create(ast_Context *ctx, struct ast_Type *return_type,
+ast_function_declaration_create(ast_Context *ctx, struct ast_Type return_type,
 				ast_Identifier name, struct ast_Block body)
 {
 	struct ast_Declaration *new_func = ast_alloc(ctx, sizeof(*new_func));
@@ -239,8 +237,8 @@ ast_parse_function_declaration(ast_Context *ctx)
 {
 	// @TODO hard coded type shit
 	ast_parser_expect(ctx, LEXER_TOKEN_TAG_TYPE_U8);
-	struct ast_Type *return_type =
-		ast_type_primitive(ctx, AST_TYPE_PRIMITIVE_U8);
+	struct ast_Type return_type;
+	ast_type_primitive(&return_type, AST_TYPE_PRIMITIVE_U8);
 
 	ast_TokenRef function_identifier =
 		ast_parser_expect(ctx, LEXER_TOKEN_TAG_LITERAL_IDENTIFIER);

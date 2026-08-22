@@ -95,12 +95,10 @@ MRT_TEST_GROUP(test_ast_basic_parse)
 	MRT_ASSERT(program.items[0]->kind == AST_DECLARATION_KIND_FUNCTION,
 		   "function declaration kind");
 
-	MRT_ASSERT(program.items[0]->as.func.return_type != NULL,
-		   "function declaration return type is set");
-	MRT_ASSERT(program.items[0]->as.func.return_type->kind ==
+	MRT_ASSERT(program.items[0]->as.func.return_type.kind ==
 			   AST_TYPE_KIND_PRIMITIVE,
 		   "function declaration return type kind");
-	MRT_ASSERT(program.items[0]->as.func.return_type->as.primitive ==
+	MRT_ASSERT(program.items[0]->as.func.return_type.as.primitive ==
 			   AST_TYPE_PRIMITIVE_U8,
 		   "function declaration return type is u8");
 
@@ -182,14 +180,11 @@ MRT_TEST_GROUP(test_ast_multiple_functions)
 	MRT_ASSERT(program.items[0]->kind == AST_DECLARATION_KIND_FUNCTION,
 		   "first declaration is a function");
 
-	MRT_ASSERT(program.items[0]->as.func.return_type != NULL,
-		   "first function return type is set");
-
-	MRT_ASSERT(program.items[0]->as.func.return_type->kind ==
+	MRT_ASSERT(program.items[0]->as.func.return_type.kind ==
 			   AST_TYPE_KIND_PRIMITIVE,
 		   "first function return type kind is primitive");
 
-	MRT_ASSERT(program.items[0]->as.func.return_type->as.primitive ==
+	MRT_ASSERT(program.items[0]->as.func.return_type.as.primitive ==
 			   AST_TYPE_PRIMITIVE_U8,
 		   "first function return type is U8");
 
@@ -214,14 +209,11 @@ MRT_TEST_GROUP(test_ast_multiple_functions)
 	MRT_ASSERT(program.items[1]->kind == AST_DECLARATION_KIND_FUNCTION,
 		   "second declaration is a function");
 
-	MRT_ASSERT(program.items[1]->as.func.return_type != NULL,
-		   "second function return type is set");
-
-	MRT_ASSERT(program.items[1]->as.func.return_type->kind ==
+	MRT_ASSERT(program.items[1]->as.func.return_type.kind ==
 			   AST_TYPE_KIND_PRIMITIVE,
 		   "second function return type kind is primitive");
 
-	MRT_ASSERT(program.items[1]->as.func.return_type->as.primitive ==
+	MRT_ASSERT(program.items[1]->as.func.return_type.as.primitive ==
 			   AST_TYPE_PRIMITIVE_U8,
 		   "second function return type is U8");
 
