@@ -281,5 +281,8 @@ ast_parse_tokens(ast_Context *ctx, lexer_Tokens tokens)
 	ctx->p.tokens = tokens;
 	ctx->p.pos = 0;
 
-	return ast_parse_program(ctx);
+	struct ast_Program program = ast_parse_program(ctx);
+	ast_typecheck_program(ctx, &program);
+
+	return program;
 }

@@ -169,8 +169,6 @@ Err ast_free(ast_Context ctx);
 
 struct ast_Program ast_parse_tokens(ast_Context *ctx, lexer_Tokens tokens);
 
-void ast_typecheck_program(ast_Context *ctx, struct ast_Program *program);
-
 //
 // IR
 //

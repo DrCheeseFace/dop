@@ -121,8 +121,6 @@ MRT_TEST_GROUP(test_ast_basic_parse)
 				   ->as.ret.expression->as.number == 3,
 		   "statement expression token value");
 
-	ast_typecheck_program(&ctx, &program);
-
 	ast_free(ctx);
 }
 
@@ -156,8 +154,6 @@ MRT_TEST_GROUP(test_ast_multiple_statements)
 	MRT_ASSERT(s2->as.ret.expression->kind ==
 			   AST_EXPRESSION_KIND_LITERAL_NUMBER,
 		   "expr 2 is number");
-
-	ast_typecheck_program(&ctx, &program);
 
 	ast_free(ctx);
 }
@@ -234,8 +230,6 @@ MRT_TEST_GROUP(test_ast_multiple_functions)
 				   ->as.ret.expression->as.number == 2,
 		   "second function returns literal '2'");
 
-	ast_typecheck_program(&ctx, &program);
-
 	ast_free(ctx);
 }
 
@@ -248,7 +242,6 @@ MRT_TEST_GROUP(test_compile_return_only)
 	MRT_ASSERT(ast_init(&ctx) == OK, "ast_init OK");
 
 	struct ast_Program ast = ast_parse_tokens(&ctx, tokens);
-	ast_typecheck_program(&ctx, &ast);
 
 	lexer_destroy_tokens(tokens);
 

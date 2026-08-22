@@ -1,7 +1,7 @@
 #include "./internal.h"
 
 // @TODO add checks for expected type and size of literal
-internal_function struct ast_Type
+internal_function void
 ast_typecheck_expression(struct ast_Expression *expr)
 {
 	switch (expr->kind) {
@@ -18,8 +18,6 @@ ast_typecheck_expression(struct ast_Expression *expr)
 		__builtin_unreachable();
 	}
 	}
-
-	return expr->type;
 }
 
 internal_function void
@@ -29,8 +27,8 @@ ast_typecheck_statement(ast_Context *ctx, struct ast_Statement *stmt)
 
 	switch (stmt->kind) {
 	case AST_STATEMENT_KIND_RETURN: {
-		struct ast_Type got =
-			ast_typecheck_expression(stmt->as.ret.expression);
+		ast_typecheck_expression(stmt->as.ret.expression);
+		struct ast_Type got = stmt->as.ret.expression->type;
 
 		// primitive comparison for now
 		if (got.kind != expected.kind ||
