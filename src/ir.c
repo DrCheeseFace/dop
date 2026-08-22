@@ -35,11 +35,11 @@ ir_add_function_declaration(struct ast_FunctionDeclaration func,
 		if (func.body.items[i]->kind == AST_STATEMENT_KIND_RETURN) {
 			LLVMBuildRet(
 				builder,
-				LLVMConstInt(return_type,
-					     atoll((char *)func.body.items[i]
-							   ->as.ret.expression
-							   ->value),
-					     FALSE));
+				LLVMConstInt(
+					return_type,
+					func.body.items[i]
+						->as.ret.expression->as.number,
+					FALSE));
 			continue;
 		}
 

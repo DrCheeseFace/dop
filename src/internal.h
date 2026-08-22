@@ -77,7 +77,11 @@ enum ast_ExpressionKind {
 
 struct ast_Expression {
 	enum ast_ExpressionKind kind;
-	ast_Identifier value;
+	struct ast_Type *type;
+	union {
+		ast_Identifier identifier;
+		uint8_t number;
+	} as;
 };
 
 // statements
@@ -109,11 +113,26 @@ enum ast_DeclarationKind {
 	AST_DECLARATION_KIND_FUNCTION,
 };
 
-enum ast_Type { AST_TYPE_U8 };
+enum ast_TypeKind {
+	AST_TYPE_KIND_PRIMITIVE,
+	// AST_TYPE_KIND_POINTER,
+	// AST_TYPE_KIND_ARRAY,
+};
+
+enum ast_TypePrimitive {
+	AST_TYPE_PRIMITIVE_VOID,
+	AST_TYPE_PRIMITIVE_U8,
+};
+
+struct ast_Type {
+	enum ast_TypeKind kind;
+	union {
+		enum ast_TypePrimitive primitive;
+	} as;
+};
 
 struct ast_FunctionDeclaration {
-	// @TODO inefficient as heck
-	enum ast_Type return_type;
+	struct ast_Type *return_type;
 	ast_Identifier name;
 	struct ast_Block body;
 };
@@ -141,12 +160,15 @@ typedef struct {
 typedef struct {
 	ast_Parser p;
 	alloc_Pool memory_pool;
+	struct ast_Declaration *current_function;
 } ast_Context;
 
 Err ast_init(ast_Context *ctx);
 Err ast_free(ast_Context ctx);
 
 struct ast_Program ast_parse_tokens(ast_Context *ctx, lexer_Tokens tokens);
+
+void ast_typecheck_program(ast_Context *ctx, struct ast_Program *program);
 
 //
 // IR

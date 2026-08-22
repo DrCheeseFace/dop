@@ -1,7 +1,5 @@
 #include "./internal.h"
 
-#define ast_alloc(ctx, size) alloc_alloc(&ctx->memory_pool, size)
-
 Err
 ast_init(ast_Context *ctx)
 {
@@ -26,7 +24,14 @@ ast_expression_create(ast_Context *ctx, enum ast_ExpressionKind kind,
 	}
 
 	expression->kind = kind;
-	strcpy((char *)expression->value, (char *)value);
+	expression->type = NULL;
+
+	if (kind == AST_EXPRESSION_KIND_LITERAL_NUMBER) {
+		expression->as.number =
+			(uint8_t)strtoul((char *)value, NULL, 10);
+	} else if (kind == AST_EXPRESSION_KIND_IDENTIFIER) {
+		strcpy((char *)expression->as.identifier, (char *)value);
+	}
 
 	return expression;
 }
@@ -81,7 +86,7 @@ ast_block_push_statement(ast_Context *ctx, struct ast_Block *block,
 }
 
 internal_function struct ast_Declaration *
-ast_function_declaration_create(ast_Context *ctx, enum ast_Type return_type,
+ast_function_declaration_create(ast_Context *ctx, struct ast_Type *return_type,
 				ast_Identifier name, struct ast_Block body)
 {
 	struct ast_Declaration *new_func = ast_alloc(ctx, sizeof(*new_func));
@@ -95,7 +100,6 @@ ast_function_declaration_create(ast_Context *ctx, enum ast_Type return_type,
 	new_func->as.func.return_type = return_type;
 	strcpy((char *)new_func->as.func.name, (char *)name);
 	new_func->as.func.body = body;
-
 	return new_func;
 }
 
@@ -235,6 +239,8 @@ ast_parse_function_declaration(ast_Context *ctx)
 {
 	// @TODO hard coded type shit
 	ast_parser_expect(ctx, LEXER_TOKEN_TAG_TYPE_U8);
+	struct ast_Type *return_type =
+		ast_type_primitive(ctx, AST_TYPE_PRIMITIVE_U8);
 
 	ast_TokenRef function_identifier =
 		ast_parser_expect(ctx, LEXER_TOKEN_TAG_LITERAL_IDENTIFIER);
@@ -247,7 +253,7 @@ ast_parse_function_declaration(ast_Context *ctx)
 
 	struct ast_Block function_body = ast_parse_block(ctx);
 
-	return ast_function_declaration_create(ctx, AST_TYPE_U8,
+	return ast_function_declaration_create(ctx, return_type,
 					       function_identifier_token->value,
 					       function_body);
 }

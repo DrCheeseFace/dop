@@ -2,7 +2,9 @@ SRC_LIB      := src/main.c
 
 SRC_TEST_MAIN := src/test/test.c \
                  src/lexer.c \
-                 src/ast.c \
+                 src/ast/parse.c \
+                 src/ast/typecheck.c \
+                 src/ast/type.c \
                  src/ir.c \
                  src/posix/alloc.c
 
