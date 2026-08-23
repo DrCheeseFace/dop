@@ -22,6 +22,10 @@ ir_to_llvm_type(struct ast_Type ast_type, LLVMContextRef context)
 internal_function LLVMValueRef
 ir_build_expression(struct ast_Expression *expression, LLVMContextRef context)
 {
+	if (expression == NULL) {
+		return NULL;
+	}
+
 	switch (expression->kind) {
 	case AST_EXPRESSION_KIND_LITERAL_NUMBER: {
 		LLVMTypeRef expression_type =
@@ -44,13 +48,9 @@ ir_add_statement(struct ast_Statement *item, LLVMContextRef context,
 {
 	switch (item->kind) {
 	case AST_STATEMENT_KIND_RETURN: {
-		if (item->as.ret.expression == NULL) {
-			LLVMBuildRetVoid(builder);
-			return;
-		}
-
 		LLVMValueRef ret_val =
 			ir_build_expression(item->as.ret.expression, context);
+
 		LLVMBuildRet(builder, ret_val);
 
 		break;

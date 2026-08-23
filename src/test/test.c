@@ -231,7 +231,7 @@ MRT_TEST_GROUP(test_ast_multiple_functions)
 
 MRT_TEST_GROUP(test_compile_return_only)
 {
-	const char *code_string = "u8 main(){return 1;}";
+	const char *code_string = "u8 main(){return 1;} void bruh(){return;}";
 	lexer_Tokens tokens = lexer_create_tokens(code_string);
 
 	ast_Context ctx;
