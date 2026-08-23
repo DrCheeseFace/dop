@@ -48,6 +48,7 @@ enum lexer_TokenTag {
 	LEXER_TOKEN_TAG_DELIM_CLOSECURLY,
 	LEXER_TOKEN_TAG_DELIM_ENDSTATEMENT,
 
+	LEXER_TOKEN_TAG_TYPE_VOID,
 	LEXER_TOKEN_TAG_TYPE_U8,
 
 	LEXER_TOKEN_TAG_EOF,
@@ -56,7 +57,7 @@ enum lexer_TokenTag {
 };
 
 struct lexer_Token {
-	enum lexer_TokenTag type;
+	enum lexer_TokenTag kind;
 	ast_Identifier value;
 };
 
@@ -110,7 +111,7 @@ enum ast_StatementKind {
 
 // @TODO add stuff to track type and data and stuff
 struct ast_ReturnStatement {
-	struct ast_Expression *expression;
+	struct ast_Expression *expression; // if void return, this is null
 };
 
 struct ast_Statement {

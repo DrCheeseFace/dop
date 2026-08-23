@@ -27,38 +27,38 @@ MRT_TEST_GROUP(test_lexer_basic_tokenize)
 
 	MRT_ASSERT(tokens != NULL, "tokens array should not be NULL");
 
-	MRT_ASSERT(tokens[0].type == LEXER_TOKEN_TAG_TYPE_U8,
-		   "token 0 = U8 type");
+	MRT_ASSERT(tokens[0].kind == LEXER_TOKEN_TAG_TYPE_U8,
+		   "token 0 = U8 kind");
 
-	MRT_ASSERT(tokens[1].type == LEXER_TOKEN_TAG_LITERAL_IDENTIFIER,
+	MRT_ASSERT(tokens[1].kind == LEXER_TOKEN_TAG_LITERAL_IDENTIFIER,
 		   "token 1 = an identifier");
 	MRT_ASSERT(strcmp((char *)tokens[1].value, "main") == 0,
 		   "token 1 value = 'main'");
 
-	MRT_ASSERT(tokens[2].type == LEXER_TOKEN_TAG_DELIM_OPENPAREN,
+	MRT_ASSERT(tokens[2].kind == LEXER_TOKEN_TAG_DELIM_OPENPAREN,
 		   "token 2 = open parenthesis");
 
-	MRT_ASSERT(tokens[3].type == LEXER_TOKEN_TAG_DELIM_CLOSEPAREN,
+	MRT_ASSERT(tokens[3].kind == LEXER_TOKEN_TAG_DELIM_CLOSEPAREN,
 		   "token 3 = close parenthesis");
 
-	MRT_ASSERT(tokens[4].type == LEXER_TOKEN_TAG_DELIM_OPENCURLY,
+	MRT_ASSERT(tokens[4].kind == LEXER_TOKEN_TAG_DELIM_OPENCURLY,
 		   "token 4 = open curly brace");
 
-	MRT_ASSERT(tokens[5].type == LEXER_TOKEN_TAG_KEYWORD_RETURN,
+	MRT_ASSERT(tokens[5].kind == LEXER_TOKEN_TAG_KEYWORD_RETURN,
 		   "token 5 = return keyword");
 
-	MRT_ASSERT(tokens[6].type == LEXER_TOKEN_TAG_LITERAL_NUM,
+	MRT_ASSERT(tokens[6].kind == LEXER_TOKEN_TAG_LITERAL_NUM,
 		   "token 6 = number literal");
 	MRT_ASSERT(strcmp((char *)tokens[6].value, "3") == 0,
 		   "token 6 value = '3'");
 
-	MRT_ASSERT(tokens[7].type == LEXER_TOKEN_TAG_DELIM_ENDSTATEMENT,
+	MRT_ASSERT(tokens[7].kind == LEXER_TOKEN_TAG_DELIM_ENDSTATEMENT,
 		   "token 7 = end statement");
 
-	MRT_ASSERT(tokens[8].type == LEXER_TOKEN_TAG_DELIM_CLOSECURLY,
+	MRT_ASSERT(tokens[8].kind == LEXER_TOKEN_TAG_DELIM_CLOSECURLY,
 		   "token 8 = close curly brace");
 
-	MRT_ASSERT(tokens[9].type == LEXER_TOKEN_TAG_EOF,
+	MRT_ASSERT(tokens[9].kind == LEXER_TOKEN_TAG_EOF,
 		   "token 9 = EOF marker");
 
 	lexer_destroy_tokens(tokens);
@@ -160,7 +160,7 @@ MRT_TEST_GROUP(test_ast_multiple_statements)
 
 MRT_TEST_GROUP(test_ast_multiple_functions)
 {
-	const char *code_string = "u8 f() {return 1;} u8 g() {return 2;}";
+	const char *code_string = "u8 f() {return 1;} void g() {return;}";
 	lexer_Tokens tokens = lexer_create_tokens(code_string);
 
 	ast_Context ctx;
@@ -210,7 +210,7 @@ MRT_TEST_GROUP(test_ast_multiple_functions)
 		   "second function return type kind is primitive");
 
 	MRT_ASSERT(program.items[1]->as.func.return_type.as.primitive ==
-			   AST_TYPE_PRIMITIVE_U8,
+			   AST_TYPE_PRIMITIVE_VOID,
 		   "second function return type is U8");
 
 	MRT_ASSERT(strcmp((const char *)program.items[1]->as.func.name, "g") ==
@@ -222,13 +222,9 @@ MRT_TEST_GROUP(test_ast_multiple_functions)
 	MRT_ASSERT(program.items[1]->as.func.body.items[0]->kind ==
 			   AST_STATEMENT_KIND_RETURN,
 		   "second function statement is return");
-	MRT_ASSERT(program.items[1]->as.func.body.items[0]
-				   ->as.ret.expression->kind ==
-			   AST_EXPRESSION_KIND_LITERAL_NUMBER,
-		   "second function return expression is literal number");
-	MRT_ASSERT(program.items[1]->as.func.body.items[0]
-				   ->as.ret.expression->as.number == 2,
-		   "second function returns literal '2'");
+	MRT_ASSERT(program.items[1]->as.func.body.items[0]->as.ret.expression ==
+			   NULL,
+		   "second function return expression is null");
 
 	ast_free(ctx);
 }

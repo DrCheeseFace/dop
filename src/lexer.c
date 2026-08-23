@@ -10,6 +10,7 @@ const char *lexer_token_tag_to_char[LEXER_TOKEN_TAG_COUNT] = {
 	"{",
 	"}",
 	";",
+	"void",
 	"u8",
 	NO_DEFAULT_TOKEN_VALUE
 };
@@ -95,7 +96,7 @@ lexer_get_token_from_string_view(const char *code_string,
 
 	// check delimiter token type
 	if (lexer_char_is_delimiter(code_string[left])) {
-		new_token->type = lexer_char_get_delimiter(code_string[left]);
+		new_token->kind = lexer_char_get_delimiter(code_string[left]);
 		return;
 	}
 
@@ -103,23 +104,29 @@ lexer_get_token_from_string_view(const char *code_string,
 	if (strcmp((const char *)new_token->value,
 		   lexer_token_tag_to_char[LEXER_TOKEN_TAG_KEYWORD_RETURN]) ==
 	    0) {
-		new_token->type = LEXER_TOKEN_TAG_KEYWORD_RETURN;
+		new_token->kind = LEXER_TOKEN_TAG_KEYWORD_RETURN;
 		return;
 	}
 
 	// check type return token type
 	if (strcmp((const char *)new_token->value,
 		   lexer_token_tag_to_char[LEXER_TOKEN_TAG_TYPE_U8]) == 0) {
-		new_token->type = LEXER_TOKEN_TAG_TYPE_U8;
+		new_token->kind = LEXER_TOKEN_TAG_TYPE_U8;
+		return;
+	}
+
+	if (strcmp((const char *)new_token->value,
+		   lexer_token_tag_to_char[LEXER_TOKEN_TAG_TYPE_VOID]) == 0) {
+		new_token->kind = LEXER_TOKEN_TAG_TYPE_VOID;
 		return;
 	}
 
 	if (lexer_char_is_number(code_string[left])) {
 		//@TODO verify
-		new_token->type = LEXER_TOKEN_TAG_LITERAL_NUM;
+		new_token->kind = LEXER_TOKEN_TAG_LITERAL_NUM;
 	} else {
 		//@TODO verify
-		new_token->type = LEXER_TOKEN_TAG_LITERAL_IDENTIFIER;
+		new_token->kind = LEXER_TOKEN_TAG_LITERAL_IDENTIFIER;
 	}
 }
 
@@ -164,7 +171,7 @@ lexer_create_tokens(const char *code_string)
 
 	lexer_tokens_append_token(
 		&tokens, &tokens_length,
-		(struct lexer_Token){ .type = LEXER_TOKEN_TAG_EOF });
+		(struct lexer_Token){ .kind = LEXER_TOKEN_TAG_EOF });
 
 	return tokens;
 }

@@ -148,20 +148,10 @@ ast_parser_peek_at(ast_Context *ctx, ast_TokenRef ref)
 	return &ctx->p.tokens[ref];
 }
 
-/* internal_function Bool */
-/* ast_parser_match(Parser *p, enum lexer_TokenTag type) */
-/* { */
-/* 	if (ast_parser_peek(p)->type == type) { */
-/* 		p->pos++; */
-/* 		return TRUE; */
-/* 	} */
-/* 	return FALSE; */
-/* } */
-
 internal_function ast_TokenRef
-ast_parser_expect(ast_Context *ctx, enum lexer_TokenTag type)
+ast_parser_expect(ast_Context *ctx, enum lexer_TokenTag kind)
 {
-	if (ast_parser_peek(ctx)->type != type) {
+	if (ast_parser_peek(ctx)->kind != kind) {
 		// @TODO error handling
 		fprintf(stderr, "ast error: parse error at token %zu\n",
 			ctx->p.pos);
@@ -171,10 +161,36 @@ ast_parser_expect(ast_Context *ctx, enum lexer_TokenTag type)
 	return ctx->p.pos++;
 }
 
+internal_function struct ast_Type
+ast_parse_type(ast_Context *ctx)
+{
+	struct lexer_Token *token = ast_parser_peek(ctx);
+	struct ast_Type type;
+
+	switch (token->kind) {
+	case LEXER_TOKEN_TAG_TYPE_U8:
+		ast_parser_expect(ctx, LEXER_TOKEN_TAG_TYPE_U8);
+		ast_type_primitive(&type, AST_TYPE_PRIMITIVE_U8);
+		break;
+
+	case LEXER_TOKEN_TAG_TYPE_VOID:
+		ast_parser_expect(ctx, LEXER_TOKEN_TAG_TYPE_VOID);
+		ast_type_primitive(&type, AST_TYPE_PRIMITIVE_VOID);
+		break;
+
+	default:
+		fprintf(stderr, "ast error: expected type, got token %zu\n",
+			ctx->p.pos);
+		exit(1);
+	}
+
+	return type;
+}
+
 internal_function struct ast_Expression *
 ast_parse_expression(ast_Context *ctx)
 {
-	if (ast_parser_peek(ctx)->type == LEXER_TOKEN_TAG_LITERAL_NUM) {
+	if (ast_parser_peek(ctx)->kind == LEXER_TOKEN_TAG_LITERAL_NUM) {
 		ast_TokenRef literal =
 			ast_parser_expect(ctx, LEXER_TOKEN_TAG_LITERAL_NUM);
 		struct lexer_Token *literal_token =
@@ -182,7 +198,7 @@ ast_parse_expression(ast_Context *ctx)
 		return ast_expression_create(ctx,
 					     AST_EXPRESSION_KIND_LITERAL_NUMBER,
 					     literal_token->value);
-	} else if (ast_parser_peek(ctx)->type ==
+	} else if (ast_parser_peek(ctx)->kind ==
 		   LEXER_TOKEN_TAG_LITERAL_IDENTIFIER) {
 		ast_TokenRef identifier = ast_parser_expect(
 			ctx, LEXER_TOKEN_TAG_LITERAL_IDENTIFIER);
@@ -202,9 +218,16 @@ ast_parse_expression(ast_Context *ctx)
 internal_function struct ast_Statement *
 ast_parse_statement(ast_Context *ctx)
 {
-	if (ast_parser_peek(ctx)->type == LEXER_TOKEN_TAG_KEYWORD_RETURN) {
+	if (ast_parser_peek(ctx)->kind == LEXER_TOKEN_TAG_KEYWORD_RETURN) {
 		ast_parser_expect(ctx, LEXER_TOKEN_TAG_KEYWORD_RETURN);
-		struct ast_Expression *expression = ast_parse_expression(ctx);
+
+		struct ast_Expression *expression = NULL;
+
+		if (ast_parser_peek(ctx)->kind !=
+		    LEXER_TOKEN_TAG_DELIM_ENDSTATEMENT) {
+			expression = ast_parse_expression(ctx);
+		}
+
 		ast_parser_expect(ctx, LEXER_TOKEN_TAG_DELIM_ENDSTATEMENT);
 		return ast_return_statement_create(ctx, expression);
 	}
@@ -221,8 +244,8 @@ ast_parse_block(ast_Context *ctx)
 	struct ast_Block block = ast_block_init();
 	ast_parser_expect(ctx, LEXER_TOKEN_TAG_DELIM_OPENCURLY);
 
-	while (ast_parser_peek(ctx)->type != LEXER_TOKEN_TAG_DELIM_CLOSECURLY &&
-	       ast_parser_peek(ctx)->type != LEXER_TOKEN_TAG_EOF) {
+	while (ast_parser_peek(ctx)->kind != LEXER_TOKEN_TAG_DELIM_CLOSECURLY &&
+	       ast_parser_peek(ctx)->kind != LEXER_TOKEN_TAG_EOF) {
 		struct ast_Statement *statement = ast_parse_statement(ctx);
 		ast_block_push_statement(ctx, &block, statement);
 	}
@@ -235,10 +258,7 @@ ast_parse_block(ast_Context *ctx)
 internal_function struct ast_Declaration *
 ast_parse_function_declaration(ast_Context *ctx)
 {
-	// @TODO hard coded type shit
-	ast_parser_expect(ctx, LEXER_TOKEN_TAG_TYPE_U8);
-	struct ast_Type return_type;
-	ast_type_primitive(&return_type, AST_TYPE_PRIMITIVE_U8);
+	struct ast_Type return_type = ast_parse_type(ctx);
 
 	ast_TokenRef function_identifier =
 		ast_parser_expect(ctx, LEXER_TOKEN_TAG_LITERAL_IDENTIFIER);
@@ -267,7 +287,7 @@ ast_parse_program(ast_Context *ctx)
 {
 	struct ast_Program program = ast_program_init();
 
-	while (ast_parser_peek(ctx)->type != LEXER_TOKEN_TAG_EOF) {
+	while (ast_parser_peek(ctx)->kind != LEXER_TOKEN_TAG_EOF) {
 		struct ast_Declaration *decl = ast_parse_declaration(ctx);
 		ast_program_push_declaration(ctx, &program, decl);
 	}

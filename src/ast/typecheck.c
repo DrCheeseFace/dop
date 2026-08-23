@@ -27,10 +27,29 @@ ast_typecheck_statement(ast_Context *ctx, struct ast_Statement *stmt)
 
 	switch (stmt->kind) {
 	case AST_STATEMENT_KIND_RETURN: {
+		Bool is_void =
+			(expected.kind == AST_TYPE_KIND_PRIMITIVE &&
+			 expected.as.primitive == AST_TYPE_PRIMITIVE_VOID);
+
+		if (is_void) {
+			if (stmt->as.ret.expression != NULL) {
+				fprintf(stderr,
+					"type error: void function cannot return a value\n");
+				exit(1);
+			}
+			break;
+		}
+
+		// non-void must have a value
+		if (stmt->as.ret.expression == NULL) {
+			fprintf(stderr,
+				"type error: missing return value in non-void function\n");
+			exit(1);
+		}
+
 		ast_typecheck_expression(stmt->as.ret.expression);
 		struct ast_Type got = stmt->as.ret.expression->type;
 
-		// primitive comparison for now
 		if (got.kind != expected.kind ||
 		    (got.kind == AST_TYPE_KIND_PRIMITIVE &&
 		     got.as.primitive != expected.as.primitive)) {
@@ -48,10 +67,6 @@ ast_typecheck_statement(ast_Context *ctx, struct ast_Statement *stmt)
 internal_function void
 ast_typecheck_function(ast_Context *ctx, struct ast_Declaration *decl)
 {
-	if (decl->kind != AST_DECLARATION_KIND_FUNCTION) {
-		return;
-	}
-
 	ctx->current_function = decl;
 	struct ast_FunctionDeclaration *func = &decl->as.func;
 
@@ -66,6 +81,8 @@ void
 ast_typecheck_program(ast_Context *ctx, struct ast_Program *program)
 {
 	for (size_t i = 0; i < program->count; i++) {
-		ast_typecheck_function(ctx, program->items[i]);
+		if (program->items[i]->kind == AST_DECLARATION_KIND_FUNCTION) {
+			ast_typecheck_function(ctx, program->items[i]);
+		}
 	}
 }
